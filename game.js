@@ -56,12 +56,14 @@ var resize = function () {
     // Set canvas to constrained width & height
     canvas.width = screenWidth;
     canvas.height = screenHeight;
+    
     stage.scaleX = screenWidth/world.width;
     stage.scaleY = screenHeight/world.height;
 };
 
 var tick = function (elapsedTime) {
     frameTime = elapsedTime;
+    stage.x = (3 - pc.x)*stage.scaleX;
     stage.update();
 
     for (key in keyPressed) {

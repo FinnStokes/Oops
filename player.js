@@ -21,7 +21,7 @@ var player = function (spec, my) {
                 run: [61,63,'running'],
                 stop: {
                     frames: [63,62,61],
-                    next: 'standing',
+                    next: 'walk',
                 },
                 crouch: [64,67,'jump'],
                 stand: {
@@ -36,54 +36,15 @@ var player = function (spec, my) {
         anim.scaleY = 1/64;
         anim.regX = 0;
         anim.regY = 0;
-        anim.gotoAndPlay('standing');
+        anim.gotoAndPlay('walk');
         that.addChild(anim);
     };
     img.src = "player.png";
 
-    var maxSpeed = 5;
+    var maxSpeed = 3;
+    var walkSpeed = 1;
     var gravity = 9.8
-    var accel = 5;
-    
-    var running = function () {
-        if (keyDown[KEYMAP.jump]) {
-            if(anim) {
-                anim.gotoAndPlay('jump');
-            }
-
-            return prejump;
-        }
-        
-        var speed = Math.abs(that.vx);
-        if (speed === 0) {
-            if(anim) {
-                anim.gotoAndPlay('stop');
-            }
-            
-            that.vx = 0;
-            return standing;
-        }
-        
-        var dir = that.vx / speed;
-            
-        if ((that.vx < 0 && !keyDown[KEYMAP.left]) || (that.vx > 0 && !keyDown[KEYMAP.right])) {
-            that.vx -= dir * accel * frameTime / 1000;
-            if(that.vx*dir < 0) {
-                if(anim) {
-                    anim.gotoAndPlay('stop');
-                }
-
-                that.vx = 0;
-                return standing
-            }
-        } else {
-            that.vx += dir * accel * frameTime / 1000;
-            if (Math.abs(that.vx) > maxSpeed) {
-                that.vx = dir * maxSpeed;
-            }
-        }
-        return running;
-    }
+    var accel = 2;
     
     var prejump = function () {
         if(anim && !anim.paused) {
@@ -140,26 +101,81 @@ var player = function (spec, my) {
 
             return prejump;
         }
-        if (keyDown[KEYMAP.left]) {
+        if (!keyDown[KEYMAP.left]) {
             if(anim) {
-                anim.gotoAndPlay('run');
+                anim.gotoAndPlay('walk');
             }
 
-            that.vx = -1 * accel * frameTime / 1000;
-            return running;
-        }
-        if (keyDown[KEYMAP.right]) {
-            if(anim) {
-                anim.gotoAndPlay('run');
-            }
-
-            that.vx = accel * frameTime / 1000;
-            return running;
+            return walking;
         }
         return standing;
     }
+
+    var walking = function () {
+        if (keyDown[KEYMAP.jump]) {
+            if(anim) {
+                anim.gotoAndPlay('crouch');
+            }
+
+            return prejump;
+        }
+
+        if (keyDown[KEYMAP.left]) {
+            that.vx -= accel * frameTime / 1000;
+            if(that.vx < 0) {
+                if(anim) {
+                    anim.gotoAndPlay('standing');
+                }
+
+                that.vx = 0;
+                return standing
+            }
+        } else {
+            that.vx += accel * frameTime / 1000;
+            if (that.vx > walkSpeed) {
+                if (keyDown[KEYMAP.right]) {
+                    if (anim) {
+                        anim.gotoAndPlay('run');
+                    }
+
+                    return running;
+                }
+                
+                that.vx = walkSpeed;
+            }
+        }
+        
+        return walking;
+    }
     
-    my.state = standing;
+    var running = function () {
+        if (keyDown[KEYMAP.jump]) {
+            if(anim) {
+                anim.gotoAndPlay('jump');
+            }
+
+            return prejump;
+        }
+        
+        if (!keyDown[KEYMAP.right]) {
+            that.vx -= accel * frameTime / 1000;
+            if(that.vx <= walkSpeed) {
+                if(anim) {
+                    anim.gotoAndPlay('stop');
+                }
+
+                return walking
+            }
+        } else {
+            that.vx += accel * frameTime / 1000;
+            if (Math.abs(that.vx) > maxSpeed) {
+                that.vx = maxSpeed;
+            }
+        }
+        return running;
+    }
+        
+    my.state = walking;
     
     return that;
 }
