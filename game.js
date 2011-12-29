@@ -21,12 +21,12 @@ var init = function () {
     // Initialise player character and world
     pc = player({
         x: 0,
-        y: 15,
+        y: 7,
     });
     stage.addChild(pc);
     world = world({
         width: 16,
-        height: 16,
+        height: 8,
     });
     stage.addChild(world);
     
@@ -50,7 +50,7 @@ var resize = function () {
         screenWidth = screenHeight * targetAspect;
     } else {
         // window is too high
-        screenHeight = screenWidth * targetAspect;
+        screenHeight = screenWidth / targetAspect;
     }
     
     // Set canvas to constrained width & height
