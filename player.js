@@ -50,7 +50,7 @@ var player = function (spec, my) {
         if(anim && !anim.paused) {
             return prejump;
         } else {
-            that.vy = -5;
+            that.vy = -6;
             return jumping;
         }
     }
